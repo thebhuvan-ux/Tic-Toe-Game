@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TIC-TAC-TOE Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    .game-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      width: 420px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #f9f9f9;
+      text-shadow: 0 0 10px #0ff;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #121212;
+      color: #00ffe7;
+      font-size: 2.5em;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #00ffe7;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .cell:hover {
+      background: #1a1a1a;
+      transform: scale(1.05);
+    }
+
+    .status {
+      font-size: 18px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 5px #0ff;
+    }
+
+    .reset-button, .start-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00bcd4;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    .reset-button:hover, .start-button:hover {
+      background: #0097a7;
+      box-shadow: 0 0 15px #0097a7;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 14px;
+      color: #ccc;
+      font-weight: bold;
+      text-shadow: 0 0 5px #00ffe7;
+    }
+
+    .name-inputs {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>TIC-TAC-TOE</h1>
+
+    <div id="player-form" class="name-inputs">
+      <input type="text" id="playerX" placeholder="Enter Player X Name (e.g., Bhuvan)" /><br>
+      <input type="text" id="playerO" placeholder="Enter Player O Name (e.g., Tej)" /><br>
+      <button class="start-button" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="game-board" style="display:none;">
+      <div id="status" class="status"></div>
+      <div id="board" class="board"></div>
+      <button onclick="resetGame()" class="reset-button">Reset Game</button>
+    </div>
+
+    <div class="footer">Done by A. Bhuvan Reddy</div>
+  </div>
+
+  <script>
+    let currentPlayer = "X";
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let gameActive = true;
+    let playerNames = { X: "Player X", O: "Player O" };
+
+    const boardElement = document.getElementById("board");
+    const statusElement = document.getElementById("status");
+    const playerForm = document.getElementById("player-form");
+    const gameBoard = document.getElementById("game-board");
+
+    function startGame() {
+      const nameX = document.getElementById("playerX").value.trim();
+      const nameO = document.getElementById("playerO").value.trim();
+
+      if (nameX === "" || nameO === "") {
+        alert("Please enter names for both players.");
+        return;
+      }
+
+      playerNames.X = nameX;
+      playerNames.O = nameO;
+
+      playerForm.style.display = "none";
+      gameBoard.style.display = "block";
+      statusElement.textContent = `${playerNames.X}'s Turn (X)`;
+
+      drawBoard();
+    }
+
+    function drawBoard() {
+      boardElement.innerHTML = "";
+      board.forEach((cell, index) => {
+        const div = document.createElement("div");
+        div.classList.add("cell");
+        div.textContent = cell;
+        div.addEventListener("click", () => handleCellClick(index));
+        boardElement.appendChild(div);
+      });
+    }
+
+    function handleCellClick(index) {
+      if (board[index] !== "" || !gameActive) return;
+
+      board[index] = currentPlayer;
+      drawBoard();
+      checkWinner();
+
+      if (gameActive) {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusElement.textContent = `${playerNames[currentPlayer]}'s Turn (${currentPlayer})`;
+      }
+    }
+
+    function checkWinner() {
+      const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+
+      for (const pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          statusElement.textContent = `${playerNames[board[a]]} Wins!`;
+          gameActive = false;
+          return;
+        }
+      }
+
+      if (!board.includes("")) {
+        statusElement.textContent = "It's a Draw!";
+        gameActive = false;
+      }
+    }
+
+    function resetGame() {
+      currentPlayer = "X";
+      board = ["", "", "", "", "", "", "", "", ""];
+      gameActive = true;
+      statusElement.textContent = `${playerNames.X}'s Turn (X)`;
+      drawBoard();
+    }
+  </script>
+</body>
+</html>
